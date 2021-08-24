@@ -53,3 +53,49 @@ Notes per lecture of aws
 
 ### AWS Access Key, CLI and SDK
   
+  ### How to access AWS, we have 3 options:
+   - AWS Management console(protected by password + MFA(optional))
+   - AWS Command Line Interface(CLI): protected by access keys(access Key ID,secret access Key)
+   - AWS Software Development Kit(SDK) - for code: protected by access keys
+  #### Note
+  `User will have their access keys and they will manage/protect those keys by themselves. treat access Key ID as username, secret access Key as password.`
+
+### AWS CLI
+   - Command line tool which enable you to interact with aws services using commands in command-line shell.
+   - eg; aws s3 cp smile.jpeg s3://demo-001/smile.jpeg
+   - We get direct access of public api's of aws services.
+### AWS SDK
+   - Language specific APIs(set of libraries).
+   - We can access and manage our aws services resources by program using SDK's APIs.
+   - Support: Nodejs, Javascript, PHP, .Net, Ruby, Java, Go, Python, Javascript, C++, etc.
+   - Also Mobile SDK(Andriod, IOS, ...).
+   - IoT Devices SDKs(Embedded C, Aurdino). 
+
+### AWS CloudShell
+   - It is browser-based, pre-authenticated shell(Bash, Powershell, z shell) which you can launch directly from aws management console.
+   - Not available in all regions.
+
+### IAM Roles for AWS Services
+   - As aws services require to perform actions on behalf of iam user(suppose a lambda function want to invoke other lambda function).
+   - So we require to provide permissions to AWS services using IAM Roles.
+   - These are roles create to get used by aws services, not by users.
+   - Common roles: 
+    - EC2 instance roles
+    - Lambda function roles
+    - Roles for cloudformation
+
+### IAM Security Tools
+   - **IAM Credentials report (account-level):** report list all of your account users and status of this various credentials. eg; this report give last time account login, is MFA active, access keys generated or not. Help to get know user for enhance security.
+   - **IAM Access Advisor(user-level):** show service permission granted to a user and last time those services are used by those user. This is helpfull to know which permissions are not in used and then we can remove those permission from that user.
+
+### IAM Guides and best practices
+   - Don't use root account except for aws account setup.
+   - One physical user   = one aws user. as sharing credentials may cause missuse. It's better to create seperate user for them with minimal permissions or policy attached to them.
+   - Assign users to groups and assign permissions to groups to manage access at group level.
+   - Create strong password policy.
+   - User yourself MFA. Can also enforce other iam users of your account to enforce use of MFA. This is for safety of user credentils.
+   - Create and use roles for giving permissions to AWS services.
+   - User access keys for programmatically(cli/sdk) access of aws services.
+   - User IAM credentials report for audit permissions of users. also iam access advisor.
+   - Never share IAM user and access keys.
+   - group cannot  have group(s), only have users.
