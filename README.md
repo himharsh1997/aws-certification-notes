@@ -28,6 +28,7 @@ Notes per lecture of aws
  `Either can either create policy or add already existing policy to user else can also add policy directly to that partifular user as inline policy`
 
 ### IAM - Policy Password. 
+
  `In this we use options to make users to either :-`
   - Not change password
   - Change in every 90 days forced
