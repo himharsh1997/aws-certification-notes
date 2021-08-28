@@ -99,3 +99,77 @@ Notes per lecture of aws
    - User IAM credentials report for audit permissions of users. also iam access advisor.
    - Never share IAM user and access keys.
    - group cannot  have group(s), only have users.
+
+### EC2 fundamentals
+
+   **EC2 Basics**
+   - Used for infrastructure as a service.
+   - Used for rent virtual machines, storing data on virtual drives(EBS), destribute load access machines(ELB), scaling services using auto-scaling group(ASG).
+   - Learning ec2 fundamental is learning cloud work.
+   - For storage space:
+       - Network-attached (EBS & EFS)
+       - Hardware (EC2 Instance store)
+   - Firewall rules: security groups
+   - Bootstrap script(configure at first launch): EC2 user data scripts. That means launch/run commands once when machine start(first time). This this uses root user for doing this.
+
+   **EC2 instance launch**
+    - Select Amamzon Machine Image(AMI) or your own AMI created.
+    - security group base on your comsumer and security.
+    - storage EBS
+    - user data or script to run at time of instance launch.
+    - stop instance if not in use.
+
+   **EC2 Instance Type**
+   - General purpose: Balanced in cpu, memory, network resources. it also has differnet family like m5.2xlarge
+   - Compute Optimize(C): Great for compute-intensive tasks that require high performance like
+     - batch processing workloads
+     - media transcoding
+     - high performance web server
+     - scientific model and machine learning
+     - dedicated gaming servers 
+   - Memory Optimize: Fast performance for worload with large dataset like
+     - High performance relational/non-realtional database
+     - Distributed web scale cache stores
+     - In-memory databases optimized for BI
+   - Storage Optimize: For storage-intensive tasks that require high, sequential read and write access to large data in localstorage like
+      - High frequency online transaction processing(OLTP) systems
+      - Relational& NoSQL database
+      - Distributed file system
+   - etc
+
+   **EC2 Instance Naming convention**
+   -  m5.2xlarge : 
+      - m is instance class
+      - 5 is generation(aws improve it over time)
+      - 2xlarge is size within instance class(size, memory, cpu)
+
+   **EC2 billing**
+     - cover later
+
+   **Security Groups**
+   - For network security in AWS. Like a firewall.
+   - Control traffic in or out of EC2 instances.
+   - Can be attach to instance to set inbound and outboud rules
+   - They control:
+    - Access to ports
+    - Authorized ipv4 and ipv6
+    - Control inbound(traffic from out to in instance).
+    - Control outbound(from instance to other).
+   - We can attach single group to multiple instances, also one instance with multiple groups
+   - Security group are outside instance, so Ec2 instance won't know what traffic are blocked.
+   - Good practice to maintain seperate security group for SSH access.
+   - If you gettin connection refused error than it is application error not security groups error.
+   - All inbound traffic is blocked by default.
+   - All outbound traffic is authorized by default.
+
+   **Reference security group from other security groups**
+    - If we have Instance1 with inbound security group 1, security group 2. 
+    - Then if Instance2 with security group 2 and Instance3 with securoty group 1 try to call it can do it without timout due to having 
+   
+   **Ports to know**
+   - 22 = SSH(Secure Shell) - log into a linux shell.
+   - 21 = FTP(File Transfer Protocol) - upload fiels in file share.
+   - 22 = SFTP(Secure File Transfer Protocol) - upload file using SSH.
+   - 80 = HTTP - access unsecured websites
+   - 443 = HTTPS - access secured websites.
+   - 3389 = RDP(Remote Desktop Protocol) - login in window instance.
