@@ -176,15 +176,28 @@ Notes per lecture of aws
  
   > **Note**s: 0.0.0.0/0 means from anywhere on ipv4 and ::/0 means from anywhere on ipv6
 
-  ### SSH Summary
+  ### <u>SSH Summary</u>
   - Protocal to communicate securely with remote server using command execution from terminal only.
-  - SSH can we used in macos, linux and window >= 10. For windows < 10 we can use **putty** to use ssh protocol to connecto server.
-  - We can also use ssh connect(from all browser). But only applicable to Linux EC2 instances for now.
+  - SSH can we used in macos, linux and window >= 10. For windows < 10 we can use **putty** to use ssh protocol to connecto server(key filename has extension ppk).
+  - We can also use ssh connect(from all browser). But only applicable to Linux EC2 instances for now. But make sure inbound rule allowed it.
 
-  ### Work with SSH connect
-    - You will have key file like key_name.pem downloaded at time of ec2 instance created.
-    - Only those user with that file can access ec2 using ssh
-    - First time when you try to connect with command `ssh ec2-user@x.y.z.m` where x,y,z,m are ipv4 values you will get error of permission deny as only user with  key file can access.
-    - Next time if you try to connect with command `ssh -i filename ec2-user@x.y.x.m` you will get bad permission 0644(-rw-r--r-) as due to security reason ssh won't allow you to use key file with other having access to read.
-    - So run `chmod 0400 filename` to change permission
-    - Now try again connect using `ssh -i filename ec2-user@x.y.x.m` you get connected to ec2 instance. Hurrah!!!
+  ###  <u>Work with SSH connect</u>
+  - You will have key file like key_name.pem downloaded at time of ec2 instance created.
+  - Only those user with that file can access ec2 using ssh
+  - First time when you try to connect with command `ssh ec2-user@x.y.z.m` where x,y,z,m are ipv4 values you will ge  error of permission deny as only user with  key file can access.
+  - Next time if you try to connect with command `ssh -i filename ec2-user@x.y.x.m` you will get bad permission 06  (-rw-r--r-) as due to security reason ssh won't allow you to use key file with other having access to read.
+  - So run `chmod 0400 filename` to change permission
+  - Now try again connect using `ssh -i filename ec2-user@x.y.x.m` you get connected to ec2 instance. Hurrah!!!
+  - Make sure you ec2 instance also having ssh utility installed
+  - Permission denied (publickey,gssapi-keyex,gssapi-with-mic) error cause due to wrong key file/ wrong username(ec2-user).
+
+
+  ><u>Note</u>: Never store your ec2 credential in ec2 instance as it may get use by other users which make this as bad practice. So it better to attach IAM role to service as good practice instead of adding aws access keys.
+
+### <u>EC2 instance purchase option or launch type</u>
+- **On demand Instances**: short workload, predicatable pricing.
+- **Reserved Instance**: Minimum 1 yr which can be use in pattern -
+   - Reserved Instances: long workload
+   - Convertable reserved instances: long workloads with flexible instance
+   - Scheduled reserved instances: eg every thursday between 3 to 6 pm.
+- **Spot Instances**: 
