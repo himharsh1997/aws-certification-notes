@@ -173,3 +173,18 @@ Notes per lecture of aws
    - 80 = HTTP - access unsecured websites
    - 443 = HTTPS - access secured websites.
    - 3389 = RDP(Remote Desktop Protocol) - login in window instance.
+ 
+  > **Note**s: 0.0.0.0/0 means from anywhere on ipv4 and ::/0 means from anywhere on ipv6
+
+  ### SSH Summary
+  - Protocal to communicate securely with remote server using command execution from terminal only.
+  - SSH can we used in macos, linux and window >= 10. For windows < 10 we can use **putty** to use ssh protocol to connecto server.
+  - We can also use ssh connect(from all browser). But only applicable to Linux EC2 instances for now.
+
+  ### Work with SSH connect
+    - You will have key file like key_name.pem downloaded at time of ec2 instance created.
+    - Only those user with that file can access ec2 using ssh
+    - First time when you try to connect with command `ssh ec2-user@x.y.z.m` where x,y,z,m are ipv4 values you will get error of permission deny as only user with  key file can access.
+    - Next time if you try to connect with command `ssh -i filename ec2-user@x.y.x.m` you will get bad permission 0644(-rw-r--r-) as due to security reason ssh won't allow you to use key file with other having access to read.
+    - So run `chmod 0400 filename` to change permission
+    - Now try again connect using `ssh -i filename ec2-user@x.y.x.m` you get connected to ec2 instance. Hurrah!!!
