@@ -337,3 +337,45 @@ Notes per lecture of aws
   - Go to Identity Provider and you can choose any of the external federated identity provider like google, apple, amazon, OpendIdConnect, SAML.
   - Just type your external IDP client id, secret, authorization scope.
 - AWS cognito also provide triggers to invoke our lambda function to either on signup, after sigin, forget password. Bascially to have flow or do things before/after user signin/signup/forgetpassword/MFA.
+
+**Cognito Identity Pool**
+- Get identities for users so that can obtain temporary aws credentials.
+- This identity pool allow you to login though:
+  - Public providers(google, amazon, apple,etc).
+  - Allow login to user who are in Cognito User Pool.
+  - OpenID Connect Providers & SAML Identity Providers.
+  - Developer Authenticated Identities(custom login servers).
+  - Cognito identity pools allow for unauthenticated(guest) users.
+- Then uer can access AWS services either by sdk or directly though API gateway
+  - IAM Policies are applied to the user credentials which are defined by cognito
+- Eg;
+  - Web & Mobile App will login in Cognito User Pools and he/she will get JWT token.
+  - Call Identity pool with cognito token.
+  - Identity pool check token with cognito user pools and then then call AWS STS.
+  - AWS STS send temporary aws credential to user through which they can access aws services.
+- How IAM roles are decided for users?:
+  - Can have default role for both authenticated and guest users.
+  - Defines rules to choose the role for each user base on their users's ID.
+  - Using policy variable to allow to get only specific acccess on any resources.
+  - IAM credentials are obtained by Cognito Identity Pools though STS.
+  - Role must have "trust" policy of Cognito Identity Pools to work
+- For unauthenticated user we need to create role with cretain policy attach to it.
+- And we can also define policy variable on aws s3 based on prefix match with user id or identity.
+ - Like you can set condition on bucket. eg; 
+  ```{
+      "Version": "2012-10-07",
+      "Statement" : [
+        {
+          "Sid": "demoUserRestrict",
+          "Effect": "Allow",
+          "Resource": ["arn:aws:s3::fileStoreBucket"]
+          "Condition" : {"StringLike": {"s3:prefix": ["${cognito-identity.amazonaws.com:sub}/*"]}}
+        }
+      ]
+    }
+  ```
+
+**AWS STS**
+- AWS provides AWS Security Token Service (AWS STS) as a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users or for users you authenticate (federated users). 
+- Available as a global service.
+- AWS STS requests go to a single endpoint at https://sts.amazonaws.com
