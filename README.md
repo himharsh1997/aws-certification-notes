@@ -127,6 +127,7 @@ Notes per lecture of aws
      - high performance web server
      - scientific model and machine learning
      - dedicated gaming servers 
+     - Compute Optimized EC2 instances are great for compute-intensive workloads requiring high performance processors, such as batch processing, media transcoding, high performance web servers, high performance computing, scientific modeling & machine learning, and dedicated gaming servers.
    - Memory Optimize: Fast performance for worload with large dataset like
      - High performance relational/non-realtional database
      - Distributed web scale cache stores
@@ -201,3 +202,69 @@ Notes per lecture of aws
    - Convertable reserved instances: long workloads with flexible instance
    - Scheduled reserved instances: eg every thursday between 3 to 6 pm.
 - **Spot Instances**: 
+
+
+### <u>EC2 on demand</u>
+- Pay as you use:
+ - Linux - billing per second after first minute.
+ - other OS: billing per hour.
+- No need to pay in advance/upfront for use.
+- No long-term commitment.
+- recommended for short-term and un-interrupted workloads, where you can't predict how the application will behave.
+
+### <u>EC2 reserved instances</u>
+- Upto 75% discount compared to on-demand.
+- Reservation period: 1 yr = +discount | 3 yr = +++discount
+- Purchasing option: no upfront(pay monthly) | partial upfront = + | All upfront(pay right before) =++discount
+- We can reserved a specific instance.
+- used for steady-state usage application(eg; database).
+- **Convertible reserved instance option**:
+  - can change EC2 instance type.
+  - upto 52% discount.
+- **Scheduled reserved instances**:
+  - launch within time window you reserve.
+  - Use when you require it for fraction of day/week/month.
+  - Need commitment of 1 to 3 years.
+- **EC2 Stop instances**:
+  - Provide discount upto 90% compared to on-demand.
+  - instances that we can lose at any point of time if your max price is less than current spot price.
+  - most cost-effecient way in aws.
+  - Good for short workloads.
+  - usefull for workloads that are resilient/stong enough to failure.
+    - batch jobs.
+    - data analysis.
+    - image processing.
+    - any distributed workloads.
+    - workloads with flexible start, end time. 
+  - Not suitable for critical jobs or databases.
+  - Daily life example: Like all people in hotel can bid for empty rooms but highest bidder keeps the room, other kicked out
+- **EC2 dedicated hosts**:
+  - amazon ec2 dedicated host is a phyical server with EC2 instance capability fully dedicatedto your use.
+  - Dedicated host help you to address compliance requirements and reduce costs by allowing you to use your existing server bound licenses.
+  - Required 3yr commitment for reservation.
+  - More expensive.
+
+
+>Note: We can reserve instance either for full 1 yr or full 3 yr(not in mid like 2 or more than 3).
+
+## EC2 Instance Storage 
+
+ **<u>EBS Volume</u>**:
+ - Elastic Block Storage Volume is used network drive you can attach to your instances while they run.
+ - It allow instance to persist data even after they terminate.
+ - Can be mount to one instance at a time.(at CCP level).
+ - bound to a specific availibility zone, means cannot be attached to instance in other zone if created in different zone.
+ - Consider then as 'usb drive/pen drive'.
+ - Free tier: 30GB free of general purpose(SSD) type or magnetic per month.
+ - Can be detached from one EC2 instance and attached to another one quickly.
+ - Taking snapshot of a ebs volume can make it possible to use it in different availibility zone.
+ - Has fixed/provisional size in GBs, IOPS. Billed for provisional capacity, can increase capacity over time.
+ - When ec2 got create we got option like 'Delete on Termination attribute'(default is for Volume Type 'Root' instance and not for new instances)
+
+ **<u>EBS Snapshot</u>**
+  - You can make backup or snapshot of your volume at any point of time.
+  - So even if original volume is deleted volume will be available to use in other instances.
+  - It is not recommanded to detach volume to take snapshot, but it is recommenede so everything is clean in your ebs volume.
+  - Can copy snapshots across AZ or Region for global infrastructure by copy snapshot to other region,availibility zone using aws console or CLI.
+
+## AMI
