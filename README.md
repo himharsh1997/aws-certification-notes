@@ -268,3 +268,20 @@ Notes per lecture of aws
   - Can copy snapshots across AZ or Region for global infrastructure by copy snapshot to other region,availibility zone using aws console or CLI.
 
 ## AMI
+- Stands for Amazon Machine Image.
+- Customization of a EC2 instance:
+  - We can add our own software, configuration, operating system.
+  - Provide lot of option to choose for OS, things preinstalled.
+  - Faster boot/ configuration time because all your software is prepackaged in it.
+- Build for specific region but can be copied across multiple region.
+- We can launch EC2 instances from:
+  - **A Public AMI**: AWS provided.
+  - **Your own AMI**: You can make and maintain your own AMI by yourself. Responsibility is your.
+  - **AWS Marketplace AMI**: An AMI someone else made and (potentially sells by someone which you can buy).
+
+
+## AMI process (from a EC2 instance)
+- Start a EC2 instnce and customize it using AMI.
+- Stop instance(for data integrity)
+- Build an AMI - this will create EBS snapshots.
+- Launch instances from other AMIs.
