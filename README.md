@@ -285,3 +285,55 @@ Notes per lecture of aws
 - Stop instance(for data integrity)
 - Build an AMI - this will create EBS snapshots.
 - Launch instances from other AMIs.
+
+### AWS Cognito
+- Service to give users an identity so that interact with our application(mobile, web). This not mean IAM user.
+- We 2 things:
+  - **Cognito User pool(CUP)**: 
+    - Signin functionality for app users.
+    - Integrate with API Gateway & Application Load Balancer.
+    - Used for authentication.
+    - Using this your user can signin to your application or federate thought third party identity provider(IdP)
+  - **Cognito Identity Pools(Federation Identity)**:
+    - Provide AWS credentials to users so that they can access AWS resources directly.
+    - Integrate with cognito user pools as an identity provider.
+    - Identity pools are for authorization (access control). 
+    - You can use identity pools to create unique identities for users and give them access to other AWS services.
+    - Generate temporary AWS credentials for unauthenticated users.
+  - **Cognito Sync**:
+    - Service to synchronize data from device to cognito.
+    - It is deprecated and replace by aws appsync.
+    - Cognito Vs IAM: Think cognito to user for "hinder of users", "mobile users", "authenticate with SAML". IAM for user who you trust.
+
+
+### Cognito User Pool(CUP):
+
+- Service to crete serverless database of user for your web & mobile apps.
+- It mean your user can signup/signin through username/email:password combination.
+- User for password reset.
+- Email & phone number verification.
+- MFA of user.
+- Federated identities: Login through facebook, google, apple, SAML,etc.
+- Feature: Block user if their credentials are compromised.
+- Login sent back JWT.
+- **How it work with API Gateway?**=>
+  - User login through CUP and get JWT(cognito token).
+  - User sent that token to api gateway for interacting with some api.
+  - API gateway interact with CUP to evaluate cognito token.
+  - If token is valid mean user belong to pool and is not block then request sent to backend.
+- **How it work with Application Load Balancer?**=>
+  - We need to have ALB with listeners & Rules.
+  - In this setup ALB first authenticate user with CUP,once done we can forward request to backend in target group which could be EC2s, lambda functions.
+
+**Working with CUP**
+- Create pool with some name and for example choose default settings.
+- Go inside that pool.
+- Go to App Clients to create client with client id, client secret(optional) to access this pool from your application.
+- In App client setting you can set config of callback URL and identity provider, auth 2.0 settings as it could differnt for diffent client.
+- Go to domain to create domain for signin, signup pages which are hosted by aws cognito unique to a region. Prefixed domain names can only contain lower-case letters, numbers, and hyphens
+- You must enable at least one identity provider for each app client.
+- You also custom domain UI like logo, background color.
+- For federation:
+  - Go to Identity Provider and you can choose any of the external federated identity provider like google, apple, amazon, OpendIdConnect, SAML.
+  - Just type your external IDP client id, secret, authorization scope.
+- AWS cognito also provide triggers to invoke our lambda function to either on signup, after sigin, forget password. Bascially to have flow or do things before/after user signin/signup/forgetpassword/MFA.
