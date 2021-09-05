@@ -286,6 +286,16 @@ Notes per lecture of aws
 - Build an AMI - this will create EBS snapshots.
 - Launch instances from other AMIs.
 
+
+## EC2 Instance Store
+- EBS volumes are network drives with good but "limited" performance.
+- But sometime we need even higher performance due to heavy tasks, mean we require high performance hardware disk.
+- If instance reboot data will persist.
+- But data will not persist in following cases:
+  - Underlying disk drive fails.
+  - Instance stops.
+  - instance terminates. 
+
 ### AWS Cognito
 - Service to give users an identity so that interact with our application(mobile, web). This not mean IAM user.
 - We 2 things:
