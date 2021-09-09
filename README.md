@@ -287,14 +287,59 @@ Notes per lecture of aws
 - Launch instances from other AMIs.
 
 
-## EC2 Instance Store
+## EC2 Instance Store or Local EC2 Instance Store
 - EBS volumes are network drives with good but "limited" performance.
 - But sometime we need even higher performance due to heavy tasks, mean we require high performance hardware disk.
 - If instance reboot data will persist.
 - But data will not persist in following cases:
   - Underlying disk drive fails.
-  - Instance stops.
+  - Instance stops(impheral).
   - instance terminates. 
+- Very IOPS. eg i3.large*=35000(write),100k(read) to i3en.metal=1.6million(write),2million(read).
+
+## EBS Volume Type(6 types)
+- **GP2/GP3(SSD)**: General Purpose SSD Volume that balances price and performance for variety of workloads.
+- **io1/io2(SSD)**: High performance SSD volume for mission-critical low-latency or high-throughput workloads. Predictable, ,consistence, high performance, low latency.
+- **st 1(HDD)**: Low cost HDD volume designed for frequently accessed throughput-intensive workloads.
+- **sc 1(HDD)**: Lowest cost HDD volumes designed for frequently accessed, thoughput-intensive workloads.
+
+- EBS Volumes are categorized in Size| Throughput|  IOPS(i/o ops per second).
+- A boot volume refers to the portion of a hard drive containing the operating system, its supporting file system, and what hard drive contains the operating system.
+- Only gp2/gp3 and io 1/io 2 are used as boot volumes.
+- **Use cases**:
+  - General purpose SSD:
+     - Cost effective storage, low-latency.
+     - System boot volumes, Virtual desktops, development and test environments.
+     - 1GB - 16 TiB.
+     - gp3(newer generation of volume):
+       - Basline of 3,000 IOPS and throughput of 125MiB/s.
+       - Can increase IOPS to 16,000  and throughput to 1000MiB/s.
+       - Can independently change IOPS and thoughput.
+    - gp2:
+      - Small gp2 volumes can burst IOPS to 3000.
+      - Size of the volume and IOPS are linked, max IOPS is 16,000.
+      - 3IOPS per GB, means 5,334GB we the max iOPS.
+
+## Elastic File System
+- Managed file system that can be mounted on any EC2, lambda.
+- EFS works with EC2 instances in multi-AZ unlike EBS.
+- Highly available, scalable, expensive(3Xgp2), pay per use.
+- NFS will be attached to security grouup.
+- All EC2 can mount same EFS and share file among them or access same files.
+- **Use case**: content management, web serving, data sharing, wordpress.
+- Uses NFSv4.1 protocol which is standard way to mount network drive.
+- use security group to control access to EFS.
+- Compatible with Linux based AMI(not windows), lambda(as they also use linux).
+- Can use Encryption  at rest with KMS.
+- Use POSIX file system(~Linux) that has standard file system.
+- Scale automatically, pay-per-use, no capacity planning.
+- Scale:
+  -  1000 of concurrent NFS clients, 10GB+ /s thoughput.
+  -  File system can grow to petabyte-scale  network file sytem automatically.
+- Performance mode:
+
+# Command
+- `lsblk` to get storage volumes attached to instance.
 
 ### AWS Cognito
 - Service to give users an identity so that interact with our application(mobile, web). This not mean IAM user.
