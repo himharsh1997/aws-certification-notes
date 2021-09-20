@@ -336,7 +336,33 @@ Notes per lecture of aws
 - Scale:
   -  1000 of concurrent NFS clients, 10GB+ /s thoughput.
   -  File system can grow to petabyte-scale  network file sytem automatically.
-- Performance mode:
+- **EFS Scale**:
+   - 1000s of concurrent NFS clients, 10GB+/s thoughput.
+   - Grow to petabyte-scale network file system, automically.
+- **Performance mode**(set at EFS creation time):
+   - General purpose(default): latency-sensitive, low thoughput cases(web server, CMS, etc) where files are small and quick to access.
+   - Max I/O - higher latency, thoughput, highly parellel (big data, media processing).
+- **Throughput mode**:
+   - Bursting(1 TB = 50MiB/s + burst of 100MiB/s).
+   - Provised: set your thoughput regardless of storage size, ex; 1GiB/s for 1 TB storage.(storage size is small but need high throughput).
+- We can mount EFS to EC2 instance but make sure EC2 instance has Type NFS and security group as what that NFS has.
+- Eg; Mount EFS in 2 Ec2 instance's any directory and then create file there it will go to EFS and will be visible to both and on write by one reflect to other also.
+- After you create an Amazon EFS file system and mount it locally on your EC2 instance, it exposes an empty directory called the file system root.
+
+
+## EBS VS EFS
+- <p style="color:#2979ff">Elastic Block Storage :::</p>
+- EBS volume can be attached to on Ec2 instance at a given time and is locked at the Avalibility Zone(AZ) level.
+- EBS gp2: IO increases if the disk size increses.
+- EBS io 1: IO increases independently.
+- EBS colume can be migrate accross AZ by taking snapshot and restore snapshot to another AZ.
+- EBS baackups use IO's and shouldn't run them while your application is handling a lot of traffic.
+- By default root EBS volumes got terminated(can disable that) when EC2 instance got terminated.
+- Pay for provisioned capacity instead of used capacity.
+- <p style="color:#2979ff">Elastic File System :::</p>
+- Mounting 100s of EC2 instances across AZ but only to linux instances(as it is POSIX file system).
+- EFS share website files(wordpress).
+- Has more price than EBS but we can do cost saving using EFS-IA.
 
 # Command
 - `lsblk` to get storage volumes attached to instance.
@@ -434,3 +460,68 @@ Notes per lecture of aws
 - AWS provides AWS Security Token Service (AWS STS) as a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users or for users you authenticate (federated users). 
 - Available as a global service.
 - AWS STS requests go to a single endpoint at https://sts.amazonaws.com
+
+# Scalibity & High Availibity
+- Scalibity means application can handle higher loads by adapting.
+- Kind of scalibility:
+   - Vertical(eg;instance size increase but upto a limit).
+   - Horizontal(elasticity.eg; increase number of instances). Implies distributed systems.
+- Scalibility is link to availibility but different.
+- High availibility goes in hand with horizontal scaling.
+- High availibity zone mean your application running in atleast 2 data center(=== avalibility zones).
+- Goal of high avalibility is to survive data loss.
+- For Ec2 vertical scaling is EC2 from t2.nano - 0.5GB RAM, 1CPU to u-12tbI.metal - 12.3TB of RAM, 448vCUPs.
+- Horizontal scaling:
+    - scale in(decrese number of instances), scale out(increase number of instances).
+    - Auto Scaling group.
+    - Load Balancer.
+- High availibity: 
+    - Run instances for the same application accross multi AZ. 
+    - Auto Scaling group multi AZ.
+    - Load Balancer multi AZ
+
+# Elastic Load Balancing(ELB):
+- Load balancer are servers forward traffic to multiple servers(eg; EC2 instances) downstream.
+- Why use:
+  - Spread load accross multiple downstream instances.
+  - Expose a single point of access(DNS) to your application.
+  - Seamlessly handle failures(health check in periodically) of downstream instances.
+  - Do healthcheck to your instances.
+  - Provide SSL termination(HTTPS encrypted traffic) for your websites.
+  - With sticky sessions, a load balancer assigns an identifying attribute to a user, typically by issuing a cookie or by tracking their IP details. Then, according to the tracking ID, a load balancer can start routing all of the requests of this user to a specific server for the duration of the session.
+  - High availibity accross zones.
+  - Seperate public traffic from private traffic on your cloud.
+  - ELB is managed Load Balancer:
+      - AWS gaurantees that it will be working.
+      - AWS takes care of upgrades, maintaince,high avalibility.
+      - AWS will only provide you few configuration knobs.
+  - We can also create our own load balancer which will cost less but it will be a lot of effort on our end.
+  - It is integrated with many AWS services
+     - EC2, EC2 autoscaling groups, amazon ECS.
+     - AWS certificate manager(ACM), cloudwatch.
+     - Route 53, AWS WAF, AWS Global Accelerator.
+
+  ### Health checks
+  - Crucial for load balancers.
+  - It enable load balancer to check if instance to which it fowarding traffic is ready to reply requests.
+  - Health check is done on a port and route(/health is common).
+  - If response is not 200(OK) then the instance is unhealthy.
+
+  ## Type of load balancer in AWS
+  AWS has 4 types of load balancers
+  - **Classic Load Balancer(v1 - old generation)** - 2009 - CLB
+     - Supports HTTP(layer 7), HTTPS(layer 7), TCP(layer 4), SSL(secure TCP).
+  - **Application Load Balancer(v2 - new generation)** - 2016 - ALB
+    - Supports HTTP, HTTPS, Websocket protocol.
+  - **Network Load Balancer(v2 - new generation)** - 2017 - NLB
+    - Supports TCP,TLS(secure TCP), UDP.
+  - **Gateway Load Balancer** - 2020 - GWLB
+    - Operates at network layer(3) - IP Protocol
+  - It is recommended to use the newer generation load balancers as they provide more flexibility.
+  - Some load balancer can be setup as internal(private) or external(public) ELBs.
+  - Your EC2 security group will not same as of loadbalancer but it's port allow will be for HTTP(80) but source will not be a IP range but instead will be security group of load balancer. This will link security group of  EC2 to load balancer which allow traffic from load balancer in EC2.
+
+  # Classic Load Balancer(v1)
+  - Supports HTTP(layer 7), HTTPS(layer 7), TCP(layer 4), SSL(secure TCP).
+  - Health check are TCP or HTTP based.
+  - Fixed hostname XXX.region.elb.amazonaws.com
