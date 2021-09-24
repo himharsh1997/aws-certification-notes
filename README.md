@@ -525,3 +525,27 @@ Notes per lecture of aws
   - Supports HTTP(layer 7), HTTPS(layer 7), TCP(layer 4), SSL(secure TCP).
   - Health check are TCP or HTTP based.
   - Fixed hostname XXX.region.elb.amazonaws.com
+
+## Application Load Balancer(V2)
+- Layer 7(HTTP) LB.
+- Used for load balancing to multiple HTTP applications across machines(target machines).
+- Used for load balancing to multiple applications on the same machine(ex: containers).
+- Support for HTTP/2 and websocket.
+- Support redirects(from HTTP and HTTPS).
+- Support for routing tables to different target groups:
+  - Routing based on path in URL(example.com/users and example/com/chats).
+  - Routing based on hostname in URL (one.example.com and other.example.com)
+  - Routing based on Query string, headers(example.com/users?id=123&order=1). We can send traffic for mobile, desktop based on query eg; ?Platform=Mobile, ?Platform=Desktop.
+- Great fit for microservices & container-based application
+  (example: Docker & Amazon ECS).
+- Has port mapping feature to redirect to a dynamic port in ECS.
+- In comparison, we need multiple classic Load balancer per application. But we require one ALB for all applications. 
+- Can route to multpiple target groups.
+- Health checks are done at target group level.
+- Application servers don't see IP, port of clients directly but need to get send in headers X-Forwared-For, X-Forwared-Port.
+
+## Target groups for ALB
+- EC2 instances(can be managed by ASG) - HTTP.
+- ECS tasks(managed by ECS itself) - HTTP.
+- Lamabda functions - HTTP request is transalated into a JSON event.
+- Prvate IPs.
