@@ -528,6 +528,7 @@ Notes per lecture of aws
 
 ## Application Load Balancer(V2)
 - Layer 7(HTTP) LB.
+- Around 400ms latency.
 - Used for load balancing to multiple HTTP applications across machines(target machines).
 - Used for load balancing to multiple applications on the same machine(ex: containers).
 - Support for HTTP/2 and websocket.
@@ -549,3 +550,12 @@ Notes per lecture of aws
 - ECS tasks(managed by ECS itself) - HTTP.
 - Lamabda functions - HTTP request is transalated into a JSON event.
 - Prvate IPs.
+
+## Network loadBalancer
+- Layer 4 of osi model.
+- Latency ~100ms
+- Forward TCP and UDP traffic to your instances.
+- Handle millions of requests per second. Mean very high performance.
+- Has one static IP per AZ, and supports assigning Elastic IP(helpfull for whitelisting specific IP). It is different from CLB, ALB who have static hostname but not static IP.
+- Used for extreme performance, TCP or UDP traffic.
+- Not in free tier.
