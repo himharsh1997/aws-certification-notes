@@ -515,6 +515,8 @@ Notes per lecture of aws
     - Supports HTTP, HTTPS, Websocket protocol.
   - **Network Load Balancer(v2 - new generation)** - 2017 - NLB
     - Supports TCP,TLS(secure TCP), UDP.
+    - Provides the highest performance and lowest latency if your application needs it.
+    - Network Load Balancer has one static IP address per AZ and you can attach an Elastic IP address to it. Application Load Balancers and Classic Load Balancers as a static DNS name.
   - **Gateway Load Balancer** - 2020 - GWLB
     - Operates at network layer(3) - IP Protocol
   - It is recommended to use the newer generation load balancers as they provide more flexibility.
@@ -544,6 +546,8 @@ Notes per lecture of aws
 - Can route to multpiple target groups.
 - Health checks are done at target group level.
 - Application servers don't see IP, port of clients directly but need to get send in headers X-Forwared-For, X-Forwared-Port.
+
+When you enable ELB Health Checks, your ELB won't send traffic to unhealthy (crashed) EC2 instances.
 
 ## Target groups for ALB
 - EC2 instances(can be managed by ASG) - HTTP.
@@ -630,3 +634,146 @@ Notes per lecture of aws
 - **ALB(v2), NLB(v2)**:
   - Support multiple listeners with multiple SSL cerficates.
   - Uses SNI to make it work.
+
+### Connection draining
+
+- Feature draining:
+  - In CLB it is called as connection draining.
+  - In ALB & NLB it was call as Deregistration Delay.
+- Time to complete 'in-flight requests' while the instance is de-registring or unhealthy.
+- Stop sending new request to EC2 instance which is de-registering.
+- Can set connection draining value betweeen 1-3600 seconds(default:300s).
+- Can be disabled(set value to 0).
+- Set value based on your request time is short or high.
+
+### Auto-scaling Group
+- In real-life load on your website and application can change(increase/decrease).
+- With this we can create and get rid of instances very quickly.
+- Goal of it is:
+   - Scale out(add EC2 instaances) to match an increased load.
+   - Scale in(remove EC2 instances) to match an decreased in load.
+   - Ensure we have a minimum and a maximum number of machines running.
+   - Automatically Register new instances to a load balancer. 
+- We have minium EC2 instances running in ASG, Acctual size/desired capacity EC2 instance running currently, maximum of EC2 instance can increase.
+- ASG and Load balancer work hand in hand to handle out traffic increase/decrease automatically.
+- The Auto Scaling Group can't go over the maximum capacity (you configured) during scale-out events.
+
+### ASG has following attributes:
+-  A launch configuration(same like when we launch EC2 instance):
+   - AMI+instance Type
+   - EC2 user data(script run after EC2 instance launch).
+   - EBS volumes.
+   - Security groups.
+   - SSH Key pair.
+- Min Size/ Max Sizze/Initial Capacity.
+- Network + Subnets information.
+- Load Balancer information.
+- Scaling policies.
+
+### Auto Scaling Alarms
+ - It is possible to sacle an ASG based on cloudwatch alarms
+ - An alarm monitors a metric(average CPU utilisation of all EC2 instance).
+ - Metrics are computed for the overall ASG instances.
+ - Based on the alarm:
+   - We can create scale-out policies(increase the number of instances).  
+   - We can create scale-in policies(decrease the number of instances).  
+
+### Auto Scaling new rules
+ - It is now possible to define "better" auto scaling rules that are directly managed by EC2.
+    - Target Average CPU usage.
+    - Number of requests on the ELB per instance.
+    - Average network in.
+    - Average network out.
+ - These rules are easy to setup and make more sense on scaling group.
+
+### Auto Scaling custom metric
+ - Can auto scale based on custom metric like number of users connected to a instance.
+ - We can send custom metric from our application in EC2 instance using PutMetric API.
+ - Create cloudwatch alarms to react to high/low values.
+ - Use cloudwatch alarms as a scaling poicy for your ASG
+
+ ### ASG Brain Dump
+ - Scaling policies can be on CPU, Network, ... and can even be on custom metrics or based on a schedule(if you know your visitors paattern).
+ - ASG use launch configuration or launch templates(newer).
+ - To update ASG provide new launch configuration.
+ - IAM role attach to ASG got attach to EC2 instance in it.
+ - ASG are free. You only pay for underlying resources launched.
+
+ ## ASG Policies
+ - Dynamic Policies
+ - Predictive Scaling
+
+ ## Dynamic Policies
+  - **Target Tracking Scaling**:
+    - Most simple and easy to set-up.
+    - Example: I want to have avarage CPU usage around 40%.
+    - The scaling policy adds or removes capacity as required to keep the metric at, or close to, the specified target value.
+  - **Simple/ Step Scaling**:
+    - We have to create cloudwatch alarm which is trigger(CPU > 70) then add 2 units.
+    - We have to create cloudwatch alarm which is trigger(CPU < 40) then remove 2 units.
+    - We have to create cloudwatch alarm which is trigger(CPU > 70) then set to certain units.
+  - **Scheduled Acions**:
+    - Anticipate a scaling group based on certain pattern.
+    - Eg; increase the min capacity to 10 at 5 PM on every Friday.
+
+## Predictive Scaling
+   - Continously forecast load and schedule scaling ahead.
+
+## Good Metrics scales on
+- CPU utilisation: Average CPU utilisation across your instances.
+- RequestCountPerInstance: To make sure number of request per instances is stable.
+- Average Network in/out (if you're application is network bound). eg; lot of uploads, downloads happens.
+- Custom Metrics.
+
+## Scaling Cooldown
+- After a scaling activity happens you are in cooldown period(default 300 seconds).
+- During cooldown period ASG will not launch/terminate any instances(for metrics to stabilize).
+- Advice: Use a ready-to-use AMI to reduce configuration time in order to be serving request fasters and reduce the cooldown period.
+
+
+------------------------------------
+## AWS RDS <img src="https://aws-course-resources.s3.amazonaws.com/rds.png" alt="Your image title" height="30" width="30"/>
+- RDS stands for Relational Database Service.
+- It's a managed DB service for DB use SQL as query language.
+- It allows you to create databases in the cloud that are managed by AWS.
+   - Postgres
+   - MySQL
+   - MariaDB
+   - Oracle
+   - Microsoft SQL Server
+   - Aurora(AWS Propriety Database)
+
+### Advantage of RDS versus deploying on EC2
+- RDS is managed service:
+  - Automated provisioning, OS patching.
+  - Continious backups and restore to specific timestamp(Point in time restore).
+  - Monitoring dashboards.
+  - Read replica for improved performance.
+  - Multi AZ setup for DR(Disaster Recovery).
+  - Maintainance windows for upgrade.
+  - Scaling capability(vertical and horizontal) by increasing read replica.
+  - Storage backed by EBS(gp2 or io1).
+- But you can't SSH into your service.
+
+### RDS Backups
+- Backups are automatically anabled by RDS.
+- Automated backups:
+    - Daily full backup of database(during the maintainance window eg; at night 11 every day).
+    - Transaction logs are backup by RDS every 5 minutes.
+    - ability to restore to any point in time(from oldest to 5min ago backup).
+    - 7 days retention(can be increased to 35 days).
+- DB snapshots:
+  - Manually triggers by user.
+  - Backup retention for as long as you want.
+
+### RDS Storage Auto Scaling
+ - <img src="https://aws-course-resources.s3.amazonaws.com/rds-storage-auto-scaling.png" height="260" width="260"/>
+ - Helps you increase storage on your RDS DB instance dynamically.
+ - When RDS detects you are running out of free storage, it scales automatically.
+ - Avoid manual scaling your database storage.
+ - You have to set maximum storage threshold(maximum limit for DB storage).
+ - It will automatically modify storage if:
+   - Free storage is less than 10% of allocated storage.
+   - Low-storage last at least 5 minutes.
+   - 6 hours has been passed since last modification.
+ - Usefull for application with unpredicatable workloads. 
