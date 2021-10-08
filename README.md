@@ -777,3 +777,40 @@ When you enable ELB Health Checks, your ELB won't send traffic to unhealthy (cra
    - Low-storage last at least 5 minutes.
    - 6 hours has been passed since last modification.
  - Usefull for application with unpredicatable workloads. 
+
+
+## RDS Read Replica vs Multi AZ
+
+### RDS read replicas for read scalibility
+- <img src="https://aws-course-resources.s3.amazonaws.com/rds-read-replica-scalibility.png" height="260" width="290"/>
+- Upto 5 Read Replicas.
+- Can be within same AZ(availibility zone), cross AZ or Cross region.
+- Replication is ASYNC, so reads are eventually consistent.Require low bandwidth. Asynchronous replication products copy the data to the replica after the data is already written to the primary storage. Although the replication process may occur in near-real-time, it is more common for replication to occur on a scheduled basis. For instance, write operations may be transmitted to the replica in batches on a periodic basis (for example, every one minute). In case of a fail-over event, some data loss may occur.
+- Replicas can be promoted to their own DB means now they will become primary DB.
+
+
+### Use case:
+   <img src="https://aws-course-resources.s3.amazonaws.com/rds-read-replica-use-case.png" height="400" width="800"/>
+
+## RDS read replicas Network cost
+- In AWS there's a network cost when goes from one AZ to another
+- If read replica is in same availibility zone then we don't need to pay fee for those replicas.
+- But if read replicas are in different region or cross region then there is some cost need to pay.
+
+### RDS multi AZ(Disaster Recovery)
+
+- Syncronous replication.
+- There will be a standby DB instance in your region to which every write change in master will get syncronously replicated.
+- One DNS name - automatic failover to standup.
+- Increase availibility.
+- Failover in case of loss of AZ, loss of network, instance or storage failure.
+- No manual intervation in apps.
+- Not used for scaling.
+- Read replica can be setup to multi AZ for disaster recovery.
+- To go from single-AZ to multi-AZ there will be:
+   - Zero downtime(no need to stop DB).
+   - Just click on modify for database.
+- Following thing happens internally in failover:
+  - Snapshot is taken.
+  - A new DB is restored from the snapshot in a new AZ.
+  - Syncronization is established between two database.
