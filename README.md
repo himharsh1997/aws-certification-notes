@@ -814,3 +814,91 @@ When you enable ELB Health Checks, your ELB won't send traffic to unhealthy (cra
   - Snapshot is taken.
   - A new DB is restored from the snapshot in a new AZ.
   - Syncronization is established between two database.
+
+  ### RDS security - Encryption
+  <img src="https://aws-course-resources.s3.amazonaws.com/rds-security-encryption.png" width="700" height="330"/>
+
+  ### RDS Encryption Operations
+  - **Encrypting RDS backups**:
+    - Snapshots of un-encrypted RDS will be un-encrypted.
+    - Snapshots of encrypted RDS databases are encrypted.
+    - We can create snapshot of un-encrypted RDS and make it encrypted by modifying the config(enable encryption).
+  - **To encrypt and un-encrypted RDS database**: 
+    - Create snapshot of un-encrypted datbase.
+    - Copy the snapshot and enable encyption for the snapshot.
+    - restore the database from un-encrypted database.
+    - Migrate application to new database, delete old database.
+
+  ### RDS Security - Network & IAM
+  <img src="https://aws-course-resources.s3.amazonaws.com/rds-security-network-iam.png"  width="700" height="330"/>
+
+  ### RDS - IAM Authentication
+  -  <img src="https://aws-course-resources.s3.amazonaws.com/rds-iam-authentication.png" width="380" height="320"/> 
+  - IAM datbase authentication only works with MySQL and PostgreSQL.
+  - You don't need password, just an auth token obtain IAM & RDS API Calls.
+  - Auth token has lifetime of 15 minutes. 
+  - Benfits:
+    - Network in/out must be encrypted using SSL.
+    - IAM to centrally manage users instead of DB.
+    - Can leverage IAM roles and ec2 instance profile for easy integration.
+
+  ## Amazon Aurora
+   - Prorietory technology from AWS(not open sourced).
+   - Postgres and MySQL are both supported Aurora DB(means your driverss will work if Aurora was postgres or mysql).
+   - Aurora is "AWS cloud optimized" and claims 5x performance improvement over MYSQL, over 3x then performance of postgres on RDS.
+   - Aurora storage  automatically grows in increments of 10GB, upto 64TB.
+   - Aurora can have 15 read replicas while MySQL has 5, the replication process in faster
+   - Failover in Aurora is instantenous as compared to MsSQL RDS. It's HA(High Availibility) native.
+   - Aurora costs more than RDS (20% more) - but is more efficient.
+
+  ## Aurora high availibility and read replicas
+  - <img src="https://aws-course-resources.s3.amazonaws.com/aurora-high-availibility-read-replicas.png" width="700" height="330"/>
+  - 1 master
+  - Shared storage volumes
+  - Data is automatically replicated across Availability Zones, your data is highly durable with less possibility of data loss.
+  -  Restore data at any point of time without using backups. 
+
+  ### Aurora DB Clustor
+  - <img src="https://aws-course-resources.s3.amazonaws.com/aurora-clustor.png" width="580" height="340" style="border: 1px solid white"/>
+  - Provide Writer Endpoint so failover not effect.
+  - Provide Reader Endpoint which will connect our application to replicas and load balance traffic comming to read replicas.
+
+  ### Aurora Security
+  - Similar to RDS as both uses same engines.
+  - Encryption at rest using KMS.
+  - Automatication snapshots, backups and replicas are also encrypted.
+  - Encryption in-flight using SSL(same as MySQL or Postgres).
+  - Can authenticate with IAM token(same as RDS).
+  - You are responsible for protecting instance with security groups.
+  - You can't SSH.
+
+
+-------------------------------------------------------------------------------------------------------------
+ 
+ 
+## AWS ElasticCache <img src="https://aws-course-resources.s3.amazonaws.com/elastic-cache.jpeg" height="50" width="50" style="margin-left: 30px; margin-top: 30px;border: 1px solid white">  
+ - The same way RDS is get managed Relational Database.
+ - Elasticcache is to manged Redis or Memchached.
+ - Caches are in-memory databases with really high performance, low latency.
+ - Helps reduce load off of databases for read intensive workloads.
+ - Make your application stateless.
+ - AWS will take care of OS maintainance/patching, optimizations, setup, configuration, monitoring, failure recovery and backups.
+ - Using this involves heavy application code changes.
+
+
+### Redis vs Memecache
+<img src="https://aws-course-resources.s3.amazonaws.com/redis-vs-memecache.png" width="680" height="340" />
+
+### Caching strategies
+
+- **Lazy loading/ cache aside**: 
+   - Cache hit return data to application.
+   - Cache miss then call RDS to get data and then store it in cache and returm data. so 3 round trip.
+   - Data may become stale.
+   - All data is in use.
+- **Write Through**: 
+   - When RDS update happening then update cache also. 2 calls
+   - Always updated/fresh data in cache.
+   - Chance of unused data.
+- **Cache Eviction and TTL**:
+   - <img src="https://aws-course-resources.s3.amazonaws.com/cache-eviction-and-ttl.png" width="680" height="340" >
