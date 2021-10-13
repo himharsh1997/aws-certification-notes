@@ -902,3 +902,74 @@ When you enable ELB Health Checks, your ELB won't send traffic to unhealthy (cra
    - Chance of unused data.
 - **Cache Eviction and TTL**:
    - <img src="https://aws-course-resources.s3.amazonaws.com/cache-eviction-and-ttl.png" width="680" height="340" >
+
+ ### ElatiCache Replication: Cluster Mode disabled
+ - <img src="https://aws-course-resources.s3.amazonaws.com/read-replica-cluster-mode-disabled.png" width="280" height="220" />
+ - One primary node, upto 5 replica.
+ - Has max 1 shard in a cluster.
+ - Primary node is for read/write.
+ - Ther other nodes are read only.
+ - All node have all the data.
+ - This guard against failover or data loss.
+ - Multi-AZ enabled by default.
+ - Helpfull of read performance. This point is main highlight.
+
+  ### ElatiCache Replication: Cluster Mode enabled.
+   - <img src="https://aws-course-resources.s3.amazonaws.com/elasticache-read-replicas-cluster-enabled.png" width="350" height="290" />
+  - Data is partitoned across shards(helpfull to scale writes).
+  - Each shard will have a primary and upto 5 read replicas(same concept as before).
+  - Multi-AZ capability.
+  - Upto 500 nodes per cluster.
+    - 500 shared with single master.
+    - 250 shareds with 1 master and 1 read replica.
+    - ...
+    - 83 shards with 1 master and 5 read replicas.
+
+
+  >> Multi-AZ helps when you plan a disaster recovery for an entire AZ going down. If you plan against an entire AWS Region going down, you should use backups and replication across AWS Regions.
+  >> Multi-AZ keeps the same connection string regardless of which database is up.
+
+
+----------------------------------------------------------------------------------------
+  ### DNS Terminologies
+  - **Domian Registrar**: Amazon Route 53, GoDaddy, etc.
+  - **DNS Records**: A, AAAA, CNAME, NS,..
+  - **Zone File**: Contains DNS records. Used for match hostname to IP address.
+  - **Name Server**: resolve DNS queries(Authoritative or Non-Authoritative).
+  - **Top Level Domain(TLD)**: .com, .us, .in, .gov, .org, etc.
+  - **Second Level Domain(SLD)**: amazon.com, google.com, etc.
+  - Eg; http:api.www.example.com.
+     - dot at end is root of all domain names(root servers).
+     - .com is TLD.
+     - example.com is SLD.
+     - www.example.com is Sub Domain.
+     - api.www.example.com is your Domain name.
+     - http is protocol
+     - Combine all we have Fully Qualified Domain Name(FQDM).
+
+  ### DNS Working
+  <img src="https://aws-course-resources.s3.amazonaws.com/dns-working.png" width="650" height="350" />
+
+### Amazon Route 53
+ - <img src="https://aws-course-resources.s3.amazonaws.com/amazon-route-53.png" width="290" height="250" >
+ -  A higly available, scalable, fully managed and Athoritative DNS. Athoritative = customer(mean you) can update DNS records.
+ - Also a domain regitrar.
+ - Has Ability to check health of your resources.
+ - Only AWS service to provide 100% availibility SLA.
+ - Why Route 53 has 53 in name? 53 is reference to traditional DNS port.
+
+### Records Types
+- **A** - maps a hostname to IPV4
+- **AAAA** - maps a hostname to IPV6
+- **CNAME** - maps a hostname to another hostname
+  - The target is a domain name which must be A or AAAA record
+  - Can't create CNAME for top node of a DNS namespace(Zone apex).
+  - eg; You can't create CNAME for example.com but can create for www.example.com
+- **NS** - Name servers for Hosted Zone. They will respond to DNS queries.
+   - Control how traffic is routed for domain.
+
+### **Hosted Zones**
+- Container for records that define how to route traffic to a domain and it's subdomains.
+- **Public Hosted Zones** - contain records that specify how to route traffic on the internet(public domain names). eg application1.mypublicdomain.com.
+- **Private Hosted Zones** - Contain records that specify how to route traffic within one or more VPCs(private domain names). we have seen this kind inside a corporate. eg; application1.company.internal
+- You need to pay $0.50 per month per hosted zone.
