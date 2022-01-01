@@ -146,7 +146,10 @@ Notes per lecture of aws
 
    **<u>EC2 billing</u>**
      - cover later
-
+     - Spot Instances are good for short workloads and this is the cheapest EC2 Purchasing Option. But, they are less reliable because you can lose your EC2 instance.
+     - Reserved Instances are good for long workloads. You can reserve EC2 instances for 1 or 3 years
+     - Storage Optimized EC2 instances are great for workloads requiring high, sequential read/write access to large data sets on local storage.
+     - Dedicated Hosts are good for companies with strong compliance needs or for software that have complicated licensing models. This is the most expensive EC2 Purchasing Option available.
    **<u>Security Groups</u>**
    - For network security in AWS. Like a firewall.
    - Control traffic in or out of EC2 instances.
@@ -1113,3 +1116,332 @@ When you enable ELB Health Checks, your ELB won't send traffic to unhealthy (cra
 ### Routing Policy - Multi-value
 - <img src="https://aws-course-resources.s3.amazonaws.com/routing-policy-multi-value.png" height="200" width="600"/>
 - Route 53 return multiple IP values to client from which it can call any one randomly. Domain is same.
+
+## AWS S3 
+- <img src="https://aws-course-resources.s3.amazonaws.com/s3-pic.png" height="50" width="50">
+- Advertise as "infinitely scalable" storage.
+- Can be used to host website.
+- Allow to store objects(file) in "buckets"(directories).
+- Each bucket should have globally unique name.
+- Buckets are defined at regional level but available at Global level.
+- Naming convention:
+   - No uppercase.
+   - No underscore.
+   - 3-63 characters long.
+   - Not an IP.
+   - Must start with lowercase letter or number.
+- <p style="color:#34bdeb">Key</p> is the FULL path(path from bucket root to that file).
+   - s3://my-bucket/<p style="color:#34bdeb">my_file.txt</p>
+   - s3://my-bucket/<p style="color:#34bdeb">folder1/my_file.txt</p>
+- Key is composed of prefix + Object.
+  - s3://my-bucket/my_folder1/another_folder/my_file.txt
+  - my_folder1/another_folder -> Prefix, my_file.txt -> object
+- There is no concept of directories in S3(UI may trick you on this).
+- Max obj size is 5TB(5000GB).
+- If uploading more than 5GB, must use "multi-part upload".
+- Version Id(if enabled).
+
+### AWS S3 versioning
+  - Enable at bucket level.
+  - version with same key created.
+  - On delete version object not delete object but add delete marker.
+
+### AWS S3 encryption for objects
+  - 4 methods of encrypt objects in S3.
+     - **SSE-S3**: Encrypt S3 objects using keys handled & managed by AWS.
+       - Object is encrypted server side.
+       - Use AES-256 encryption type.
+       - In HTTP header must set =>  "x-amz-server-side-encryption": "AES256"
+       - <img src="https://aws-course-resources.s3.amazonaws.com/sse-s3-encrypt.png" height="300" width="400">
+     - **SSE-KMS**: Leverage AWS Key Management Service to manage encryption keys.
+        - User control(who has access to keys) + audit trail.
+        - In HTTP header must set =>  "x-amz-server-side-encryption": "aws:kms"
+     - **SSE-C**: When we want to manage our own encryption keys.
+       - Amazon S3 does not store encryption key you provided.
+       - HTTPS must be used.
+       - Encryption key must be pass in header of every HTTP request.
+     - **Client Side Encryption**
+         - S3 will not apply any encryption and client is responsible for it.
+         - encrypt before send to s3.
+         - decrypt when get data from s3.
+
+### S3 Security
+ - **User based**:
+   - IAM policies - which API calls should be allowed for a specific user from IAM console. Create IAM user with specific service & resource access and scope.
+ - **Resource Based**:
+   - Bucket Policies - bucket wide rules from S3 console - allow cross account.
+   - Object ACL - fine grain.
+   - Bucket ACL - less common.
+ - Note: IAM principle can access an S3 object if the user IAM permissions allow it OR the resource policy allow it. and no explicit DENY mean there should not be case where IAM policy allow user to access bucket but bucket policy not.
+
+### S3 Bucket policies
+ - JSON based policies.
+ - Resource: buckets and objects.
+ - Actions: Set of API to allow or Deny.
+ - Effect: Allow/Deny.
+ - Principal: The account or user to apply the policy to
+ - Use S3 bucket policy to:
+   - Grant public access to the bucket.
+   - Force objects to be encrypted at uploded.
+   - Grant access to another account(Cross account).
+   - There is way to block public, cross-account access to buckets and objects though any public buckets
+
+ - <img src="https://aws-course-resources.s3.amazonaws.com/s3-security-other.png"> 
+
+- S3 is from Dec2020 is strongly consistent mean after write/ovverwrite/delete if we do read we will receive latest version.
+- When using aws cli we can run api calls as --dry-run option to simulate call.
+
+### AWS CLI STS Decode
+- AWS STS) as a web service that enables you to request temporary, limited-privilege credentials for AWS Identity and Access Management (IAM) users or for users you authenticate (federated users).
+- When we do api call from aws-cli we get a long encoded message so if we want to decode it we can use STS decode comand. eg; aws sts decode-authorization-message --encoded-message < value-of encoded message >. But for this user should have permission of AWS service.
+
+### AWS EC2 Instance Metadata
+
+
+### AWS CLI profiles
+- We could be using multiple aws credential in our machine so we can add profile using coommand => aws configure --profile {name of profile}. same can be used with API call eg; aws s3 ls --profile my-aws-profile
+
+### Use MFA with CLI
+- To use MFA with CLI, we must create a temporary session.
+- To do so we must run <b>STS GetSessionToken API</b> call through MFA.
+- aws sts get-session-token --serial-number arn-of-the-mfa-device --token-code {toke from MFA app} --duration-seconds 3600
+- To use this aws credential we can create it's profile with addition of aws_session_token to do API calls.
+- AWS CLI use python sdk boto3
+
+### Exponential Backoff(AWS Services)
+- If you get ThrottlingException(API call rate limit reached) intermittenly, use exponenetial backoff.
+- Retry mechanism already included in AWS SDK but with AWS API you are responsible for that(also only retry for error code 5XX).
+
+### AWS CLI Credentials Provider Chain
+AWS CLI look for credential in this order:
+- **Command line options**: --region, --output, --profile
+- **Environment variables**: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN
+- **CLI crendential file**: aws configure
+~/.aws/credentials on Linux / Mac & C:\Users\user\.aws\credentials on Windows
+- **Container credentials**: For ECS tasks.
+- **Instance profile credentials** - for EC2 Instance Profiles.
+
+### AWS credentials best practices
+- Overall, never ever store aws credentails in your code.
+- Best practice is to be inherited from the credentials chain.
+- If working within AWS, use IAM roles:
+  - EC2 instances Role for EC2 instances.
+  - EC2 Roles for EC2 tasks.
+  - Lambda Roles for lambda functions.
+- If working outside AWS use environment variables/ named profiles.
+
+### Signing AWS API requests
+- With AWS HTTP API call you need to sign the request so that AWS identify you using your AWS credentials.
+- Request from AWS SDK, CLI don't require this.
+-  AWS use Signature v4(Sig V4) for siging request which we need to use when doing AWS HTTP API Call.
+
+Get EC2 instance info from within instance http://169.254.169.254/latest/meta-data/
+IAM Roles can not be attached to on-premises servers.
+
+### AWS S3 Access Log
+- For audit purpose you may want to log all access to S3 buckets.
+- Any request made to S3 from any account, authirized, unauthorized will be logged into another s3 bucket.
+- Do not make your application bucket to be same as logging bucket as it make bucket to grow exponentially. Reason is on log in that bucket will get log and that log get log again as object which make size expo grow.
+
+### S3 Replication (CRR & SRR)
+- Must enable versioning in source and destination
+- Cross Region Replication(CRR). Use case: compliance, low latency access, replication accross accounts.
+- Same Region Replication(SRR). Use case: log aggregation, live replication between production and test accounts.
+- Buckets can be in different account. Use S3 replication.
+- Copying is asynchronous. But is very fast.
+- Must give proper IAM permission to S3.
+- **Note**:
+  -  After activiation, only new objects of bucket are copied(not retractive).
+  -  No chaining of bucket 1-> 2->3.
+  - Delete with same version ID is not copied for avoid malicious delete.
+
+### S3 presigned URLs
+- Can generate presigned URLs using SDK or CLI:
+   - For upload (harder, use AWS SDK).
+   - For download (easy, can use CLI).
+- Valid for a default 3600seconds but could be change using --expire-in or using AWS SDK.
+- Users given a presigned URL inherit the permissions of the person who generated the URL for GET/PUT. This mean if there is a IAM user for you and it doesn't have permission to upload  to S3 then presigned URL would not be able to upload it to.
+- Examples:
+   - Allow only login-user to download a premium video from your S3 bucket.
+   - Allow user to download files from S3 by generating URLs dynamically.
+### S3 Storage Classes
+- Amazon S3 Standard - General Purpose.
+- Amazon S3 Standard-Infrequent Access(IA).
+- ... cover later.
+
+### S3 Lifecycle Rule
+- <img src="https://aws-course-resources.s3.amazonaws.com/s3-moving-btw-storage-classes.png" height="290" width="350"> 
+- You can transition object between storage classes.
+- For frequent access object, move them to STANDARD_IA.
+- For archive objects which you don't need in real-time/frequently use GLACIER or DEEP_ARCHIVE.
+- Moving objects can be automated using lifecycle configuration.
+- Lifecycle rules define when objects are transitioned to another storage class.
+- Move objects to Standard IA class 60days after creation.
+- Move to Glacier after 6 month. 
+- <b>Expiration actions</b>:
+  - Access log files to get deletede after 365 days.
+  - Delete old veresion of objects (if versioning is enabled).
+  - Delete incomplete multi-part uploads.
+- Rules can be created for certain prefix(ex - s3://mybucket/mp3/*).
+- Rules can be created for certain object tags. eg; dep.finanace
+
+### S3 Performance
+- Amazon S3 can automatically scales to high request rates, latency 100-200ms.
+- You application can archive at least 3,500 PUT/COPY/POST/DELETE and 5,500 GET/HEAD requests per second per prefix in a bucket.
+
+### KMS as limitation for S3 performance
+- If SSE-KMS is enabled then S3 will call KMS service on your behalf and decrypt object and send that object to user. 
+- This cause performance per second to little less(5500, 10000, 30000 req/s  based on region).
+- But we can increase quota using Quota Service Console.
+- But we can optimise performance using below methods:
+  - **Multi-part upload**:
+     - File divied in parts and upload data in parallel to S3 
+     - recommanded for files > 100MB, must use for file > 5GB.
+     - Help to parallelize uploads(speed up transfer).
+  - **S3 Transfer Acceleration**:
+     - Increase file transfer speed by transferring file to the AWS Edge location which will be forwarded to the S3 bucket in target region.
+     - Compatible with multi-part upload.
+  - **S3 Byte-Range Fetches**:
+     - Parellize GETs by requesting specific byte ranges.
+     - Better resilience in case of failure as you can retry to get range of bytes in a file.
+
+### AWS S3 Select & Glacier Select
+- Filter day from S3 object using SQL which perform server side filtering.
+- Can filter by row & column. Very fast & cheaper.
+
+### S3 Event Notification
+-  <img src="https://aws-course-resources.s3.amazonaws.com/s3-event-notification.png" height="290" width="350">
+- Event use to happen in S3 when object created, deleted. eg;S3:ObjectCreated, S3:ObjectDelete,etc.
+- Can filter object by regex for notify. eg; /*.jpg
+- Use case: generate thumbnail after video got uploaded to S3.
+- S3 event delivered in second but could take a minute or longer sometime.
+- As it could be possible that 2 write happening in single object so it better to have version enabled.  Reason is with no version we will got only one event.
+
+### Amazon Athena
+ - Serverless query service to performa analytics against s3 objects.
+ - Use standard SQL language to query files.
+ - Only support JSON, CSV, ORC, Avro, Parquet(build on pesto).
+ - Pricing: $5.00 per TB of data scanned.
+ - Use cases:Business Intelligence/analytics/reporting, analyze.
+
+### AWS Cloudfront
+ - It is Content Delivery Network(CDN).
+ - Improve read performance, content is cached at the edge location(A site that CloudFront uses to cache copies of your content for faster delivery to users at any location). 
+ - 216 Point of Presence globally(edge locations).
+ - CDN give DDoS protection, integration with Shield, AWS Web Application Firewall.
+ - Can expose external HTTPS by loading certificates and talk to internl HTTPS backends if you needs to encrypt the traffic as well.
+ - Edge location cache data and get from cache next time instead of redirecting request to Cloufront orgin. 
+ - Files are cache for TTL.
+ - Great for static websites.
+ - Setup must for each region where your appliation will serve.
+ - Files updated in near real-time.
+
+### Cloudfront Origins
+ - **S3**:
+   - For distributing files and caching at the edge.
+   - Enable security with CloudFront Origin Access Identity(OAI). Only cloudfront can access it.
+   - Can be used as an ingress(upload files to S3 from anywhere in the world).
+   - OAI use to provide role(same as IAM) to cloudfront edge though which it will access S3 and cache resource.
+  
+ - **Custom Origin (HTTP)**:
+   - Application Load Balancer.
+   - EC2 instance.
+   - S3 website(must enable S3 as static site website).
+   - Any HTTP endpoint.
+
+ - **EC2 instance**:
+   -  Security group must allow cloudfront to access EC2 instance.
+   - For this we must allow public IP of edge location to be added to security group of EC2 instance.
+   - This same apply to ALB.
+
+### Cloudfront caching:
+  -  Based on(for create/update cache):
+     - Headers
+     - Session cookies.
+     - Query String parameters
+  - Behaviour of caching decided by policy.
+  - Can create multiple origin in distribution using url path. eg; /api/* -> ALB, /images/* -> S3.
+  - Cache lives at each Cloudfront edge Location.  
+  - TTL from 0sec to 1year.
+  - We can invalidate part of cache using CreateInvalidation API.
+  - Caching can be static like for S3 static content and dynamic if Cloudfront layer interact with some servers and ALB.
+  - <img src="https://aws-course-resources.s3.amazonaws.com/cloudfront-distribution-type.png" height="290" width="450">
+
+### Cloudfront Geo restriction
+  - We can restrict who can access your distribution based on geography.
+  - There will be 2list:
+    - **Whitelist**: mention in list country where user can access it.
+    - **Blocklist**: mention in list country where user can not access it.
+  - Country is detemined using 3rd party Geo-IP database.
+  - Use case: Copyright Laws to control access to content.
+
+### Cloudfront and HTTPS
+  - Viewer Protocol Policy:
+    - Redirect HTTP to HTTPS
+    - use HTTPS only.
+  - Origin Protocol Policy(HTTP or S3):
+    - HTTPS only.
+    - or Match viewe(HTTP => HTTP & HTTPS => HTTPS).
+
+  Note: S3 bucket "websites" don't support HTTPS.
+
+### Cloudfront URL /Cookies
+... later write notes.
+
+### Cloudfront signed URL - Key groups + Hands On
+  - Cloudfront use keys public and private to create sign URL(using private key by backend) and to verify it by cloudfront using public key.
+  - Type of signers:
+    - Either trusted key group(recommended): Can leverage APIs to create and rotate keys(IAM for API security).
+    - An AWS account that contains a Cloudfront Key Pair: Manage keys using root account and AWS console. Not recommended.
+
+### Cost
+- Cost vary with each edge locations.
+- Classes:
+   - Price Class All:
+.. read seperatly.
+
+- **Origin group**
+  - Use primary origin to fetch resource. If primary fail use secondary origin.
+
+Chinto@1997
+## ECS
+ - Amazon ECS makes it easy to deploy, manage, and scale Docker containers running applications, services, and batch processes. Amazon ECS places containers across your cluster based on your resource needs and is integrated with familiar features like Elastic Load Balancing, EC2 security groups, EBS volumes and IAM roles
+### ECS Clusters
+- An Amazon ECS cluster is a regional grouping of one or more container instances on which you can run task requests. Each account receives a default cluster the first time you use the Amazon ECS service. Clusters may contain more than one Amazon EC2 instance type.
+- EC2 clusters are logical grouping of EC2 instances.
+- EC2 instances run then EC2 agent(The Amazon ECS container agent is a software that AWS has developed for its Amazon EC2 Container Service that allows container instances to connect to your cluster).
+- EC2 agents registers  then instance to the cluster.
+- EC2 instances run special AMI made specially for ECS.
+- Config for cluster will be found in /etc/ecs/ecs.config
+
+### ECS task Definitions
+- Metadata in json format to tell ECS how to run a Docker container.
+- Contain crusial information about:
+  - Image name
+  - Port binding for container and host.
+  - Memory and CPU required.
+  - Environment variables.
+  - Networking information.
+  
+### Service Type of task schedular  
+  - Replica: The replica scheduling strategy places and maintains the desired number of tasks across your cluster. By default, the service scheduler spreads tasks across Availability Zones. You can use task placement strategies and constraints to customize task placement decisions
+
+  - Daemon: The daemon scheduling strategy deploys exactly one task on each active container instance that meets all of the task placement constraints that you specify in your cluster. When using this strategy, there is no need to specify a desired number of tasks, a task placement strategy, or use Service Auto Scaling policies.
+
+  ...
+
+
+## DynamoDB
+
+## WCU(Write Capacity Unit)
+ - One WCU is one write per second for an item of size upto 1KB in size.
+ - eg we write 10items per second, with item of 2KB. We will require 10*(2/1)=20WCUs.
+ - on-demand is more expensive then provised capacity mode.
+
+## Strongly Consistent Read Vs Eventually Consistent Read
+ - <img src="https://aws-course-resources.s3.amazonaws.com/dynamodb-consistent-read-types.png" height="300" width="400">
+ - In **Eventually Consistent Read** if we read just after write then it's possible we will get some stale data because of replication.
+ - In **Strongly Consistent** if we read just after write we will get correct data
+ - For SC you need to set "ConsistentRead" parameter to True in API calls(GetItems, BatchGetItems, Query, Scan). Consume twice the RCUs. SC is slow.
+ - 1RCU=1Strongly consistent Read per second or 2 Eventually Consistent Reads per second, for item upto 4KB in size. For item size > 4KB more RCU are consumed
+ - Note if size is something which is not fully divisible with 4 then roundoff it. eg if size is 6KB->8KB
